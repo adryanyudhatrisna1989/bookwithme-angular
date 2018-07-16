@@ -45,6 +45,7 @@ Thumbs.db
 
 /server/config/dev.js
 package-lock.json
+/images
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
