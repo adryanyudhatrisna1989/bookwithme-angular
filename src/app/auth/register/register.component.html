@@ -32,7 +32,7 @@
             <input [(ngModel)]="formData.passwordConfirmation" name="passwordConfirmation" type="password" class="form-control" id="passwordConfirmation"
               required>
           </div>
-          <button [disabled]="!registerForm.form.valid" (click)="register()" type="submit" class="btn btn-info">Submit</button>
+          <button [disabled]="!registerForm.form.valid" (click)="register()" type="submit" class="btn btn-bwm">Submit</button>
         </form>
         <div *ngIf="errors.length > 0" class="alert alert-danger">
           <p *ngFor="let error of errors">
@@ -43,7 +43,7 @@
       <div class="col-md-6 ml-auto">
         <div class="image-container">
           <h2 class="catchphrase">As our member you have access to most awesome places in the world.</h2>
-          <img src="assets/images/register-image2.jpeg" alt="">
+          <img src="assets/images/register-image.jpg" alt="">
         </div>
       </div>
     </div>
