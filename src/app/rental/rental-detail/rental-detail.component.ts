@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Rental } from "../shared/rental.model";
 import { RentalService } from "../shared/rental.service";
+import { Rental } from "../shared/rental.model";
 
 @Component({
   selector: "bwm-rental-detail",
@@ -21,6 +21,7 @@ export class RentalDetailComponent implements OnInit {
       this.getRental(params["rentalId"]);
     });
   }
+
   getRental(rentalId: string) {
     this.rentalService.getRentalById(rentalId).subscribe((rental: Rental) => {
       this.rental = rental;
