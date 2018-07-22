@@ -13,6 +13,7 @@ class DecodedToken {
 @Injectable()
 export class AuthService {
   private decodedToken;
+
   constructor(private http: HttpClient) {
     this.decodedToken =
       JSON.parse(localStorage.getItem("bwm_meta")) || new DecodedToken();
