@@ -10,7 +10,7 @@ import { Booking } from "../../../booking/shared/booking.model";
 import { HelperService } from "../../../common/service/helper.service";
 import { BookingService } from "../../../booking/shared/booking.service";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ToastsManager } from "ng2-toastr/ng2-toastr";
+import { ToastsManager } from "ng2-toastr";
 import { DaterangePickerComponent } from "ng2-daterangepicker";
 import * as moment from "moment";
 import { Rental } from "../../shared/rental.model";
