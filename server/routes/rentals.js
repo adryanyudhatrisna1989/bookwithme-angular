@@ -8,51 +8,126 @@ const Rental = require("../models/rental");
 
 const UserCtrl = require("../controllers/user");
 
-router.get("/secret", UserCtrl.authMiddleware, function (req, res) {
+router.get('/secret', UserCtrl.authMiddleware, function (req, res) {
   res.json({
-    secret: true
+    "secret": true
   });
 });
 
 router.get('/manage', UserCtrl.authMiddleware, function (req, res) {
   const user = res.locals.user;
 
-  Rental.where({
+  Rental
+    .where({
       user
-    }).populate('bookings')
+    })
+    .populate('bookings')
+    .exec(function (err, foundRentals) {
+
+      if (err) {
+        return res.status(422).send({
+          errors: normalizeErrors(err.errors)
+        });
+      }
+
+      return res.json(foundRentals);
+    });
+});
+
+router.get('/:id/verify-user', UserCtrl.authMiddleware, function (req, res) {
+  const user = res.locals.user;
+
+  Rental
+    .findById(req.params.id)
+    .populate('user')
     .exec(function (err, foundRental) {
       if (err) {
         return res.status(422).send({
           errors: normalizeErrors(err.errors)
         });
       }
-      return res.json(foundRental);
-    });
-})
 
-router.get("/:id", function (req, res) {
-  const rentalId = req.params.id;
-
-  Rental.findById(rentalId)
-    .populate("user", "username -_id")
-    .populate("bookings", "startAt endAt -_id")
-    .exec(function (err, foundRental) {
-      if (err) {
+      if (foundRental.user.id !== user.id) {
         return res.status(422).send({
           errors: [{
-            title: "Rental Error!",
-            detail: "Could not find rental"
+            title: 'Invalid User!',
+            detail: 'You are not rental owner!'
           }]
         });
       }
+
+
+      return res.json({
+        status: 'verified'
+      });
+    });
+});
+
+router.get('/:id', function (req, res) {
+  const rentalId = req.params.id;
+
+  Rental.findById(rentalId)
+    .populate('user', 'username -_id')
+    .populate('bookings', 'startAt endAt -_id')
+    .exec(function (err, foundRental) {
+
+      if (err) {
+        return res.status(422).send({
+          errors: [{
+            title: 'Rental Error!',
+            detail: 'Could not find Rental!'
+          }]
+        });
+      }
+
       return res.json(foundRental);
+    });
+});
+
+router.patch('/:id', UserCtrl.authMiddleware, function (req, res) {
+
+  const rentalData = req.body;
+  const user = res.locals.user;
+
+  Rental
+    .findById(req.params.id)
+    .populate('user')
+    .exec(function (err, foundRental) {
+
+      if (err) {
+        return res.status(422).send({
+          errors: normalizeErrors(err.errors)
+        });
+      }
+
+      if (foundRental.user.id !== user.id) {
+        return res.status(422).send({
+          errors: [{
+            title: 'Invalid User!',
+            detail: 'You are not rental owner!'
+          }]
+        });
+      }
+
+      foundRental.set(rentalData);
+      foundRental.save(function (err) {
+        if (err) {
+          return res.status(422).send({
+            errors: normalizeErrors(err.errors)
+          });
+        }
+
+        return res.status(200).send(foundRental);
+      });
     });
 });
 
 router.delete('/:id', UserCtrl.authMiddleware, function (req, res) {
   const user = res.locals.user;
 
-  Rental.findById(req.params.id).populate('user', '_id')
+  Rental
+    .findById(req.params.id)
+    .populate('user', '_id')
     .populate({
       path: 'bookings',
       select: 'startAt',
@@ -63,6 +138,7 @@ router.delete('/:id', UserCtrl.authMiddleware, function (req, res) {
       }
     })
     .exec(function (err, foundRental) {
+
       if (err) {
         return res.status(422).send({
           errors: normalizeErrors(err.errors)
@@ -72,8 +148,8 @@ router.delete('/:id', UserCtrl.authMiddleware, function (req, res) {
       if (user.id !== foundRental.user.id) {
         return res.status(422).send({
           errors: [{
-            title: "Invalid user!",
-            detail: "You are not the owner of this rental!"
+            title: 'Invalid User!',
+            detail: 'You are not rental owner!'
           }]
         });
       }
@@ -81,8 +157,8 @@ router.delete('/:id', UserCtrl.authMiddleware, function (req, res) {
       if (foundRental.bookings.length > 0) {
         return res.status(422).send({
           errors: [{
-            title: "Active bookings!",
-            detail: "Cannot delete rentals with active bookings!"
+            title: 'Active Bookings!',
+            detail: 'Cannot delete rental with active bookings!'
           }]
         });
       }
@@ -93,12 +169,13 @@ router.delete('/:id', UserCtrl.authMiddleware, function (req, res) {
             errors: normalizeErrors(err.errors)
           });
         }
+
         return res.json({
-          "status": 'deleted'
-        })
-      })
-    })
-})
+          'status': 'deleted'
+        });
+      });
+    });
+});
 
 router.post('', UserCtrl.authMiddleware, function (req, res) {
   const {
@@ -112,7 +189,6 @@ router.post('', UserCtrl.authMiddleware, function (req, res) {
     description,
     dailyRate
   } = req.body;
-
   const user = res.locals.user;
 
   const rental = new Rental({
@@ -126,11 +202,9 @@ router.post('', UserCtrl.authMiddleware, function (req, res) {
     description,
     dailyRate
   });
-
   rental.user = user;
 
   Rental.create(rental, function (err, newRental) {
-
     if (err) {
       return res.status(422).send({
         errors: normalizeErrors(err.errors)
@@ -144,18 +218,19 @@ router.post('', UserCtrl.authMiddleware, function (req, res) {
         rentals: newRental
       }
     }, function () {});
-    return res.json(newRental);
-  })
-})
 
-router.get("", function (req, res) {
+    return res.json(newRental);
+  });
+});
+
+router.get('', function (req, res) {
   const city = req.query.city;
   const query = city ? {
     city: city.toLowerCase()
   } : {};
 
   Rental.find(query)
-    .select("-bookings")
+    .select('-bookings')
     .exec(function (err, foundRentals) {
 
       if (err) {
@@ -167,7 +242,7 @@ router.get("", function (req, res) {
       if (city && foundRentals.length === 0) {
         return res.status(422).send({
           errors: [{
-            title: "No Rentals Found!",
+            title: 'No Rentals Found!',
             detail: `There are no rentals for city ${city}`
           }]
         });

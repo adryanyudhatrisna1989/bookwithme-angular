@@ -1,0 +1,22 @@
+<div [ngStyle]="style" class="editable-component">
+
+  <textarea *ngIf="isActiveInput" class="{{className}}" [(ngModel)]="entity[entityField]" [value]="entity[entityField]" (keydown.escape)="cancelUpdate()"
+    (keyup.enter)="updateEntity()" rows="{{rows}}" cols="{{cols}}">
+  </textarea>
+
+  <span *ngIf="!isActiveInput" class="{{className}} inline"> {{entity[entityField]}} </span>
+
+  <div class="inline">
+    <button *ngIf="!isActiveInput" class="btn btn-sm btn-info btn-editable" (click)="isActiveInput = true">
+      Edit
+    </button>
+
+    <button *ngIf="isActiveInput" class="btn btn-sm btn-primary btn-editable" (click)="updateEntity()">
+      Save
+    </button>
+
+    <button *ngIf="isActiveInput" class="btn btn-sm btn-danger btn-editable" (click)="cancelUpdate()">
+      Cancel
+    </button>
+  </div>
+</div>
