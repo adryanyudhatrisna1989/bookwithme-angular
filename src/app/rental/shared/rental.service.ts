@@ -33,4 +33,8 @@ export class RentalService {
   public updateDental(rentalId: string, rentalData: any): Observable<any> {
     return this.http.patch(`/api/v1/rentals/${rentalId}`, rentalData);
   }
+
+  public verifyRentalUser(rentalId: string): Observable<any> {
+    return this.http.get(`/api/v1/rentals/${rentalId}/verify-user`);
+  }
 }
